@@ -1,4 +1,5 @@
 import streamlit as st
+import json # 데이터를 파일로 저장하기 위한 도구
 
 # 1. 페이지 설정
 st.set_page_config(page_title="내 귀여운 말 키우기", page_icon="🐴")
@@ -19,7 +20,57 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. 데이터 초기화 (변수 저장소)
+# --- 💾 데이터 저장/불러오기 기능 (사이드바) ---
+with st.sidebar:
+    st.header("💾 데이터 관리")
+    st.write("새로고침하면 데이터가 날아가요! 꼭 저장하세요.")
+    
+    # 1) 현재 상태를 딕셔너리로 만들기
+    # (session_state를 바로 저장할 수 없어서 변환 과정이 필요함)
+    current_data = {
+        "hunger": st.session_state.get("hunger", 50),
+        "protein": st.session_state.get("protein", 30),
+        "carbs": st.session_state.get("carbs", 30),
+        "fat": st.session_state.get("fat", 30),
+        "happiness": st.session_state.get("happiness", 50),
+        "action": st.session_state.get("action", "normal"),
+        "message": st.session_state.get("message", "저장된 데이터를 불러와주세요!")
+    }
+    
+    # 2) 다운로드 버튼 (JSON 파일로 저장)
+    json_string = json.dumps(current_data)
+    st.download_button(
+        label="💾 내 말 상태 저장하기",
+        file_name="my_horse_data.json",
+        mime="application/json",
+        data=json_string,
+    )
+    
+    st.divider()
+    
+    # 3) 업로드 버튼 (파일 불러오기)
+    uploaded_file = st.file_uploader("📂 저장된 파일 불러오기", type=["json"])
+    
+    if uploaded_file is not None:
+        # 파일이 업로드되면 데이터를 읽어서 적용
+        loaded_data = json.load(uploaded_file)
+        
+        # 불러온 데이터로 덮어쓰기
+        st.session_state.hunger = loaded_data["hunger"]
+        st.session_state.protein = loaded_data["protein"]
+        st.session_state.carbs = loaded_data["carbs"]
+        st.session_state.fat = loaded_data["fat"]
+        st.session_state.happiness = loaded_data["happiness"]
+        st.session_state.action = loaded_data["action"]
+        st.session_state.message = "데이터 복구 완료! 다시 만나서 반가워! 👋"
+        
+        # 적용 후 메시지 띄우기 (한 번만 뜨도록)
+        if 'loaded' not in st.session_state:
+             st.session_state.loaded = True
+             st.success("데이터를 성공적으로 불러왔습니다!")
+             # 화면 갱신은 사용자가 버튼 누르면 자연스럽게 됨
+
+# 3. 데이터 초기화 (저장된 게 없을 때 기본값)
 if 'hunger' not in st.session_state:
     st.session_state.hunger = 50      
 if 'protein' not in st.session_state:
@@ -34,9 +85,6 @@ if 'action' not in st.session_state:
     st.session_state.action = "normal"
 if 'message' not in st.session_state:
     st.session_state.message = "안녕? 오늘은 우육면이 땡기는데... 🍜"
-
-# ★ 화면 상태 관리 (이게 추가됐어요!)
-# current_page가 'main'이면 메인화면, 'feed'면 밥 주는 화면을 보여줍니다.
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "main"
 
@@ -66,7 +114,6 @@ def eat_food(menu):
         st.session_state.fat = min(100, st.session_state.fat + 15)
         st.session_state.message = "뜨끈한 국물이 끝내줘요! 호로록!"
     
-    # 밥을 먹었으니 메인 화면으로 복귀!
     st.session_state.current_page = "main"
 
 def date_hedgehog():
@@ -93,79 +140,14 @@ def sleep_horse():
 # --- 화면 전환 로직 ---
 
 if st.session_state.current_page == "main":
-    # ================= [메인 화면] =================
     st.title("🐴 힙한 말 키우기")
     st.info(st.session_state.message)
 
     col1, col2 = st.columns([1.2, 1])
 
     with col1:
-        # 나중에 그림 그리면 여기서 파일명을 바꿔주세요!
-        # 예: if st.session_state.fat > 80: st.image("fat_horse.png")
         if st.session_state.action == "eating":
             st.image("eating.png", caption="냠냠 쩝쩝")
         elif st.session_state.action == "happy":
             st.image("happy.png", caption="행복해!")
-        else:
-            st.image("normal.png", caption="무념무상")
-
-    with col2:
-        st.write("### 📊 내 상태")
-        st.write(f"💖 행복도 ({st.session_state.happiness}%)")
-        st.progress(st.session_state.happiness / 100)
-        st.write(f"🥕 포만감 ({st.session_state.hunger}%)")
-        st.progress(st.session_state.hunger / 100)
-        
-        st.divider()
-        st.caption(f"💪 단백질 {st.session_state.protein}%")
-        st.progress(st.session_state.protein / 100)
-        st.caption(f"🍚 탄수화물 {st.session_state.carbs}%")
-        st.progress(st.session_state.carbs / 100)
-        st.caption(f"🧀 지방 {st.session_state.fat}%")
-        st.progress(st.session_state.fat / 100)
-
-    st.markdown("---")
-    
-    # 메인 버튼들
-    b1, b2, b3, b4 = st.columns(4)
-    with b1:
-        # 이 버튼을 누르면 'feed' 화면으로 이동!
-        if st.button("🍽️ 밥 주기"):
-            st.session_state.current_page = "feed"
-            st.rerun()
-    with b2:
-        if st.button("🦔 데이트"):
-            date_hedgehog()
-            st.rerun()
-    with b3:
-        if st.button("🏋️‍♀️ 운동"):
-            exercise_horse()
-            st.rerun()
-    with b4:
-        if st.button("💤 잠자기"):
-            sleep_horse()
-            st.rerun()
-
-elif st.session_state.current_page == "feed":
-    # ================= [밥 고르는 식당 화면] =================
-    st.title("🍽️ 메뉴를 골라주세요")
-    st.write("오늘은 무엇을 먹을까요? 신중하게 선택하세요!")
-    
-    # 큼지막한 라디오 버튼으로 변경
-    menu = st.radio("메뉴판", 
-        ["🥤 단백질 쉐이크", "🌾 말먹이", "🍚 밥", "🍶 술", "🍜 우육면"])
-
-    st.markdown("---")
-    
-    c1, c2 = st.columns(2)
-    with c1:
-        # 먹이기 버튼
-        if st.button("이걸로 먹이기! 🥄"):
-            eat_food(menu) # 밥 먹고 메인으로 돌아가는 로직이 함수 안에 있음
-            st.rerun()
-            
-    with c2:
-        # 취소 버튼 (메인으로 그냥 돌아가기)
-        if st.button("취소 (돌아가기)"):
-            st.session_state.current_page = "main"
-            st.rerun()
+        else
