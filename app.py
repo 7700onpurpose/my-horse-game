@@ -52,7 +52,7 @@ with st.sidebar:
     st.divider()
     
     # 3) 업로드 버튼
-    uploaded_file = st.file_uploader("📂 저장된 파일 불러오기", type=["json"])
+    uploaded_file = st.file_uploader("📂 저장된 말 상태 불러오기", type=["json"])
     
     if uploaded_file is not None:
         loaded_data = json.load(uploaded_file)
@@ -63,7 +63,7 @@ with st.sidebar:
         st.session_state.fat = loaded_data["fat"]
         st.session_state.happiness = loaded_data["happiness"]
         st.session_state.action = loaded_data["action"]
-        st.session_state.message = "데이터 복구 완료! 다시 만나서 반가워! 👋"
+        st.session_state.message = "데이터 복구 완료! 말이 돌아왔다! 👋"
         
         if 'loaded' not in st.session_state:
              st.session_state.loaded = True
@@ -95,23 +95,23 @@ def eat_food(menu):
     
     if menu == "🥤 단백질 쉐이크":
         st.session_state.protein = min(100, st.session_state.protein + 30)
-        st.session_state.message = "득근득근! 단백질이 차오른다! 💪"
+        st.session_state.message = "이걸 마시지 않으면 진정한 테토남이 될 수 없어.. 💪"
     elif menu == "🌾 말먹이":
         st.session_state.protein = min(100, st.session_state.protein + 10)
         st.session_state.carbs = min(100, st.session_state.carbs + 10)
-        st.session_state.fat = min(100, st.session_state.fat + 10)
-        st.session_state.message = "음~ 건강한 맛이야. 냠냠."
+        st.session_state.message = "콩당근.. 우적우적.."
     elif menu == "🍚 밥":
         st.session_state.carbs = min(100, st.session_state.carbs + 30)
-        st.session_state.message = "한국인은 밥심이지! 탄수화물 충전!"
+        st.session_state.protein = min(100, st.session_state.protein + 10)
+        st.session_state.message = "튜닝의 끝은 집밥이다.."
     elif menu == "🍶 술":
         st.session_state.fat = min(100, st.session_state.fat + 20)
         st.session_state.happiness = min(100, st.session_state.happiness + 30)
-        st.session_state.message = "캬~ 취한다! 기분이 너무 좋아! 🥴"
+        st.session_state.message = "기분이 둥둥 떠다닌다.. 🥴"
     elif menu == "🍜 우육면":
         st.session_state.protein = min(100, st.session_state.protein + 15)
         st.session_state.fat = min(100, st.session_state.fat + 15)
-        st.session_state.message = "뜨끈한 국물이 끝내줘요! 호로록!"
+        st.session_state.message = "현지의 맛이 난다.."
     
     st.session_state.current_page = "main"
 
@@ -123,18 +123,18 @@ def date_hedgehog():
         st.session_state.hunger = max(0, st.session_state.hunger - 10)
         st.session_state.happiness = min(100, st.session_state.happiness + 20)
         st.session_state.action = "happy"
-        st.session_state.message = "고슴도치랑 손잡고 걸었어! 너무 설레! 🦔💖"
+        st.session_state.message = "많은 활동을 함께했다.. 🦔💖"
 
 def exercise_horse():
     st.session_state.hunger = max(0, st.session_state.hunger - 20)
     st.session_state.fat = max(0, st.session_state.fat - 20)
     st.session_state.protein = min(100, st.session_state.protein + 10)
     st.session_state.action = "eating" 
-    st.session_state.message = "으쌰으쌰! 지방을 태우자! 💦 (배고파짐)"
+    st.session_state.message = "맛있는 운동이 잘 먹었다. 💦 (배고파짐)"
 
 def sleep_horse():
     st.session_state.action = "normal"
-    st.session_state.message = "쿨쿨... 꿀잠 자는 중... 💤"
+    st.session_state.message = "쿨쿨... 고슴도치의 모닝콜이 기다리고 있다... 💤"
 
 # --- 화면 전환 로직 ---
 
